@@ -22,7 +22,7 @@ class AppCoordinator: Coordinator {
         self.window = UIWindow(windowScene: windowScene)
     }
     
-    func start(){
+    func start() {
         let viewModel = WeatherViewModel()
         let scene = WeatherVC(viewModel: viewModel, coordinator: self)
         let nav = UINavigationController(rootViewController: scene)
