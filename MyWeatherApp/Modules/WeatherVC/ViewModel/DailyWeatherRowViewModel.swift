@@ -8,6 +8,7 @@
 import Foundation
 
 struct DailyWeatherRowViewModel: Identifiable {
+    
     private let item: WeeklyForecastResponse.Item
     
     var id: String {
@@ -41,9 +42,8 @@ struct DailyWeatherRowViewModel: Identifiable {
     }
 }
 
-// Used to hash on just the day in order to produce a single view model for each
-// day when there are multiple items per each day.
 extension DailyWeatherRowViewModel: Hashable {
+    
     static func == (lhs: DailyWeatherRowViewModel, rhs: DailyWeatherRowViewModel) -> Bool {
         return lhs.day == rhs.day
     }

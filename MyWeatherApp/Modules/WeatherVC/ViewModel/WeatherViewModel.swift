@@ -10,10 +10,13 @@ import Foundation
 
 protocol WeatherViewModelInputs {
     func searchBarTextDidChange(with searchText: String)
-    func searchBarSearchButtonClicked(with searchText: String?) 
+    func searchBarSearchButtonClicked(with searchText: String?)
 }
 
 protocol WeatherViewModelOutputs {
+    var reloadTableView: PassthroughSubject<Void, Never> { get }
+    var numberOfItems: Int { get }
+    func cellViewModel(at index: Int) -> DailyWeatherRowViewModel
 }
 
 protocol WeatherViewModelProtocol {
@@ -24,8 +27,6 @@ protocol WeatherViewModelProtocol {
 class WeatherViewModel: BaseVieWModel, WeatherViewModelInputs, WeatherViewModelOutputs, WeatherViewModelProtocol {
     
     //MARK: - Properties
-    private let apiFetcher: WeatherApiRepositoryProtocol
-
     var inputs: WeatherViewModelInputs {
         get { return self }
         set {}
@@ -36,17 +37,30 @@ class WeatherViewModel: BaseVieWModel, WeatherViewModelInputs, WeatherViewModelO
         set {}
     }
     
+    private let apiFetcher: WeatherApiRepositoryProtocol
+    private var dataSource: [DailyWeatherRowViewModel] = []
+    
     // MARK: - Init
     init(apiFetcher: WeatherApiRepositoryProtocol = WeatherApiRepository()) {
         self.apiFetcher = apiFetcher
     }
     
     //MARK: - Outputs
+    var reloadTableView: PassthroughSubject<Void, Never> = .init()
+    
+    var numberOfItems: Int {
+        return dataSource.count
+    }
 
+    func cellViewModel(at index: Int) -> DailyWeatherRowViewModel {
+        return dataSource[index]
+    }
+    
     //MARK: - Inputs
     func searchBarTextDidChange(with searchText: String) {
         if searchText.isEmpty {
-            print("Clear Search UI")
+            self.dataSource.removeAll()
+            self.reloadTableView.send()
         }
     }
     
@@ -60,27 +74,29 @@ class WeatherViewModel: BaseVieWModel, WeatherViewModelInputs, WeatherViewModelO
     private
     func fetchWeather(forCity city: String) {
         apiFetcher.weeklyWeatherForecast(forCity: city)
-        .map { response in
-          response.list.map(DailyWeatherRowViewModel.init)
-        }
-        .map(Array.removeDuplicates)
-        .receive(on: DispatchQueue.main)
-        .sink(
-          receiveCompletion: { [weak self] value in
-            guard let self = self else { return }
-            switch value {
-            case .failure: break
-//              self.dataSource = []
-            case .finished:
-              break
+            .map { response in
+                response.list.map(DailyWeatherRowViewModel.init)
             }
-          },
-          receiveValue: { [weak self] forecast in
-            guard let self = self else { return }
-//            self.dataSource = forecast
-        })
-        .store(in: &cancellables)
+            .map(Array.removeDuplicates)
+            .receive(on: DispatchQueue.main)
+            .sink(
+                receiveCompletion: { [weak self] value in
+                    guard let self else { return }
+                    switch value {
+                    case .failure:
+                        self.dataSource = []
+                        self.reloadTableView.send()
+                    case .finished:
+                        break
+                    }
+                },
+                receiveValue: { [weak self] forecast in
+                    guard let self else { return }
+                    self.dataSource = forecast
+                    self.reloadTableView.send()
+                })
+            .store(in: &cancellables)
     }
-
-
+    
+    
 }

@@ -10,7 +10,6 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="WeatherVC" customModule="MyWeatherApp" customModuleProvider="target">
             <connections>
-                <outlet property="searchBar" destination="Pnw-zn-00g" id="T1G-Ns-q53"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
         </placeholder>
@@ -18,19 +17,8 @@
         <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
             <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-            <subviews>
-                <searchBar contentMode="redraw" searchBarStyle="minimal" translatesAutoresizingMaskIntoConstraints="NO" id="Pnw-zn-00g">
-                    <rect key="frame" x="0.0" y="59" width="393" height="56"/>
-                    <textInputTraits key="textInputTraits"/>
-                </searchBar>
-            </subviews>
             <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-            <constraints>
-                <constraint firstItem="Pnw-zn-00g" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" id="FdU-u6-Y2h"/>
-                <constraint firstItem="Pnw-zn-00g" firstAttribute="trailing" secondItem="fnl-2z-Ty3" secondAttribute="trailing" id="RZi-Up-BH4"/>
-                <constraint firstItem="Pnw-zn-00g" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="veC-Uz-U6m"/>
-            </constraints>
             <point key="canvasLocation" x="138" y="20"/>
         </view>
     </objects>

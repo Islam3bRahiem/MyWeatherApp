@@ -43,14 +43,9 @@ class BaseView<T: BaseVieWModel>: UIViewController {
         viewModel.isLoading
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isLoading in
-                guard let self = self else { return }
-                if isLoading {
-                    // Show Loader
-                    print("Show Loader")
-                } else {
-                    // Hide Loader
-                    print("Hide Loader")
-                }
+                guard self != nil else { return }
+                // Handle Loader Here
+                print("Handle Loader Here")
             }
             .store(in: &viewModel.cancellables)
 
@@ -58,7 +53,7 @@ class BaseView<T: BaseVieWModel>: UIViewController {
         viewModel.displayMessage
             .receive(on: DispatchQueue.main)
             .sink { [weak self] message in
-                guard let self = self else { return }
+                guard let self else { return }
                 viewModel.showAlertMsg(message)
             }
             .store(in: &viewModel.cancellables)
