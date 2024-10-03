@@ -42,9 +42,15 @@ class WeatherViewModel: BaseVieWModel, WeatherViewModelInputs, WeatherViewModelO
     private let apiFetcher: WeatherApiRepositoryProtocol
     private var dataSource: [DailyWeatherRowViewModel] = []
     
+    //CoreData Repository
+    private var cashManagerRepository: CashManagerRepositoryProtocol
+    private let coreDataSerialQueue = DispatchQueue(label: "com.coredata.dispatch.serial")
+
     // MARK: - Init
-    init(apiFetcher: WeatherApiRepositoryProtocol = WeatherApiRepository()) {
+    init(apiFetcher: WeatherApiRepositoryProtocol = WeatherApiRepository(),
+         cashManagerRepository: CashManagerRepositoryProtocol = CashManagerRepository()) {
         self.apiFetcher = apiFetcher
+        self.cashManagerRepository = cashManagerRepository
     }
     
     //MARK: - Outputs
@@ -80,6 +86,12 @@ class WeatherViewModel: BaseVieWModel, WeatherViewModelInputs, WeatherViewModelO
     // MARK: - Private Functions
     private
     func fetchWeather(forCity city: String) {
+        self.fetchCityFromCoreData(forCity: city)
+    }
+    
+    private
+    func fetchWeatherApi(forCity city: String) {
+        print("Fetch API Success..")
         apiFetcher.weeklyWeatherForecast(forCity: city)
             .map { response in
                 response.list.map(DailyWeatherRowViewModel.init)
@@ -101,9 +113,53 @@ class WeatherViewModel: BaseVieWModel, WeatherViewModelInputs, WeatherViewModelO
                     guard let self else { return }
                     self.dataSource = forecast
                     self.reloadTableView.send()
+                    self.saveToCoreData(forCity: city, data: forecast)
                 })
             .store(in: &cancellables)
     }
     
+    private
+    func fetchCityFromCoreData(forCity city: String) {
+        self.coreDataSerialQueue.async() {
+            Thread.sleep(forTimeInterval: 1)
+            Task.init {
+                let newItem = await self.cashManagerRepository.fetchCity(with: city)
+                switch newItem {
+                case .success(let forecast):
+                    if forecast.isEmpty {
+                        self.fetchWeatherApi(forCity: city)
+                    } else {
+                        print("Fetch City Success..")
+                        self.dataSource = forecast
+                        DispatchQueue.main.async {
+                            self.reloadTableView.send()
+                        }
+                    }
+                case .failure(_):
+                    self.fetchWeatherApi(forCity: city)
+                    break
+                }
+            }
+        }
+    }
+    
+    private
+    func saveToCoreData(forCity city: String, data: [DailyWeatherRowViewModel]) {
+        //Cash Branches offline on coredata
+        self.coreDataSerialQueue.async() {
+            Thread.sleep(forTimeInterval: 1)
+            Task.init {
+                let newItem = await self.cashManagerRepository.saveCity(name: city, days: data)
+                switch newItem {
+                case .success( _):
+                    print("Save City Success..")
+                    break
+                case .failure(let error):
+                    print("Error : ", error.localizedDescription)
+                    break
+                }
+            }
+        }
+    }
     
 }
