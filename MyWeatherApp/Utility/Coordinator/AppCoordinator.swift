@@ -9,7 +9,7 @@ import UIKit
 
 class AppCoordinator: Coordinator {
     
-    let window: UIWindow
+    private let window: UIWindow
             
     var navigationController: UINavigationController? {
         if let navigationController = UIApplication.topMostController() as? UINavigationController {
@@ -22,6 +22,10 @@ class AppCoordinator: Coordinator {
         self.window = UIWindow(windowScene: windowScene)
     }
     
+    lazy var weather: WeatherNavigator = {
+        return .init(coordinator: self)
+    }()
+
     func start() {
         let viewModel = WeatherViewModel()
         let scene = WeatherVC(viewModel: viewModel, coordinator: self)

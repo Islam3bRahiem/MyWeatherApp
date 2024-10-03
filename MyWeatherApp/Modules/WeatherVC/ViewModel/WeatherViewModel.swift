@@ -11,10 +11,12 @@ import Foundation
 protocol WeatherViewModelInputs {
     func searchBarTextDidChange(with searchText: String)
     func searchBarSearchButtonClicked(with searchText: String?)
+    func didTapOnHeaderSection()
 }
 
 protocol WeatherViewModelOutputs {
     var reloadTableView: PassthroughSubject<Void, Never> { get }
+    var navigateToDetailsScreen: PassthroughSubject<Bool, Never> { get }
     var numberOfItems: Int { get }
     func cellViewModel(at index: Int) -> DailyWeatherRowViewModel
 }
@@ -47,6 +49,7 @@ class WeatherViewModel: BaseVieWModel, WeatherViewModelInputs, WeatherViewModelO
     
     //MARK: - Outputs
     var reloadTableView: PassthroughSubject<Void, Never> = .init()
+    var navigateToDetailsScreen: PassthroughSubject<Bool, Never> = .init()
     
     var numberOfItems: Int {
         return dataSource.count
@@ -68,6 +71,10 @@ class WeatherViewModel: BaseVieWModel, WeatherViewModelInputs, WeatherViewModelO
         if let searchText, !searchText.isEmpty {
             self.fetchWeather(forCity: searchText)
         }
+    }
+    
+    func didTapOnHeaderSection() {
+        self.navigateToDetailsScreen.send(!dataSource.isEmpty)
     }
     
     // MARK: - Private Functions

@@ -10,7 +10,8 @@ import UIKit
 protocol Coordinator {
 
     var navigationController: UINavigationController? { get }
-    
+    var weather: WeatherNavigator { get }
+
     func start()
     func dismiss()
     func pop()

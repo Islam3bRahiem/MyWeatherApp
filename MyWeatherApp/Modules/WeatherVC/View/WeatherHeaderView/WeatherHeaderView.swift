@@ -14,6 +14,7 @@ class WeatherHeaderView: UIView {
     private let summaryLabel = UILabel()
     private let arrowImageView = UIImageView()
 
+    var headerTappedAction: (() -> Void)?
 
     // MARK: - Initializer
     override init(frame: CGRect) {
@@ -65,8 +66,16 @@ class WeatherHeaderView: UIView {
             stackView.topAnchor.constraint(equalTo: self.topAnchor, constant: 10),
             stackView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -10)
         ])
+        
+        // Add tap gesture recognizer
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(headerTapped))
+        self.addGestureRecognizer(tapGesture)
     }
     
+    @objc private func headerTapped() {
+        headerTappedAction?()
+    }
+
     // MARK: - Configuration
     func configure(city: String?) {
         guard let city, !city.isEmpty else {

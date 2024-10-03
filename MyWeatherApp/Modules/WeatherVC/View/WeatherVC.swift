@@ -32,6 +32,14 @@ class WeatherVC: BaseView<WeatherViewModel> {
                 self.tableView.reloadData()
             }
             .store(in: &cancellable)
+        
+        viewModel.outputs.navigateToDetailsScreen
+            .sink { [weak self] isEnabled in
+                guard let self, isEnabled else { return }
+                self.coordinator.weather.navigate(to: .cityDetails(searchBar.text ?? ""), with: .push)
+            }
+            .store(in: &cancellable)
+
     }
     
     // MARK: - Function
@@ -112,6 +120,9 @@ extension WeatherVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let headerView = WeatherHeaderView()
         headerView.configure(city: searchBar.text)
+        headerView.headerTappedAction = {
+            self.viewModel.inputs.didTapOnHeaderSection()
+        }
         return headerView
     }
     
